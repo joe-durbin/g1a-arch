@@ -87,7 +87,7 @@ mount_partitions() {
 }
 
 configure_swap() {
-  SWAP_GB=$(( (RAM_GB * 3 + 1) / 2 ))
+  SWAP_GB=$(((RAM_GB * 3 + 1) / 2))
   chattr +C /mnt/.swap
   btrfs filesystem mkswapfile --size "${SWAP_GB}G" --uuid clear /mnt/.swap/swapfile
   swapon /mnt/.swap/swapfile
@@ -136,7 +136,7 @@ echo "zbookai" > /etc/hostname
 cat > /etc/hosts <<'EOF'
 127.0.0.1   localhost
 ::1         localhost
-127.0.1.1   zbookai.localdomain zbookai
+127.0.1.1   zbookai.local zbookai
 EOF
 sed -i 's/^#\s*\(MulticastDNS=yes\)/\1/' /etc/systemd/resolved.conf
 mkdir -p /etc/iwd
