@@ -1,0 +1,62 @@
+# --- Core Logic ---
+image=/home/joe/.current_wallpaper
+scaling=fill
+clock
+indicator
+indicator-idle-visible
+ignore-empty-password
+
+# --- Typography & Geometry ---
+# Matching your Waybar's preferred bold mono look
+#font="JetBrainsMono NF ExtraBold"
+#font-size=64
+
+# Vertical centering (using your successful blank value method)
+timestr=%H:%M
+datestr=
+
+# Slim geometry matching the "1px sunset accent" vibe
+indicator-radius=100
+indicator-thickness=6
+
+# --- Effects ---
+# Applying a subtle blur and the greyscale you liked
+effect-blur=7x5
+effect-greyscale
+effect-vignette=0.2:0.5
+
+# --- Waybar "Dark Water & Sunset" Palette ---
+# Inside: Dark translucent (rgba 10, 10, 15, 0.85) -> #0a0a0fd9
+inside-color=0a0a0fd9
+inside-clear-color=0a0a0fd9
+inside-caps-lock-color=0a0a0fd9
+inside-ver-color=0a0a0fd9
+inside-wrong-color=0a0a0fd9
+
+# Ring: The muted grey (#a6adc8) and sunset orange (#ffa564)
+ring-color=a6adc866
+ring-clear-color=ffa564
+ring-caps-lock-color=ffa564
+ring-ver-color=ffa564
+ring-wrong-color=f38ba8
+
+# Feedback Highlights
+key-hl-color=ffa564
+bs-hl-color=f38ba8
+caps-lock-bs-hl-color=f38ba8
+caps-lock-key-hl-color=ffa564
+
+# Clean up lines (matches Waybar's borderless module look)
+line-color=00000000
+line-clear-color=00000000
+line-caps-lock-color=00000000
+line-ver-color=00000000
+line-wrong-color=00000000
+separator-color=00000000
+
+# Text: Waybar's #a6adc8 (muted grey) for the clock
+text-color=a6adc8
+text-clear-color=ffa564
+text-caps-lock-color=ffa564
+text-ver-color=a6adc8
+text-wrong-color=f38ba8

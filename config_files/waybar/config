@@ -1,0 +1,100 @@
+{
+    "layer": "top",
+    "position": "top",
+    "height": 24,
+    "margin-top": 0,
+    "margin-left": 0,
+    "margin-right": 0,
+    "spacing": 0,
+
+    "modules-left": ["niri/workspaces"],
+    "modules-center": ["custom/radio", "clock"],
+    "modules-right": ["tray", "cpu", "memory", "custom/gpu", "battery", "pulseaudio", "network" ],
+
+    "niri/workspaces": {
+        "format": "{icon}",
+        "format-icons": {
+            "default": "○",
+            "active": "●"
+        }
+    },
+
+    "clock": {
+        "format": "{:%d %b  %H:%M}",
+        "tooltip-format": "<tt>{calendar}</tt>",
+        "calendar": {
+            "mode"          : "month",
+            "weeks-pos"     : "right",
+            "format": {
+                "months":     "<span color='#ffa564'><b>{}</b></span>",
+                "days":       "<span color='#a6adc8'>{}</span>",
+                "weeks":      "<span color='#94e2d5'>W{}</span>",
+                "weekdays":   "<span color='#f9e2af'><b>{}</b></span>",
+                "today":      "<span color='#ffa564'><b><u>{}</u></b></span>"
+            }
+        },
+    },
+
+    "cpu": { "format": " {usage}%", "interval": 2 },
+
+    "memory": { "format": " {percentage}%", "interval": 2 },
+
+    "custom/gpu": {
+        "exec": "cat /sys/class/drm/card1/device/gpu_busy_percent",
+        "format": "󰢮 {}%",
+        "interval": 2
+    },
+
+    "pulseaudio": {
+        "format": "{icon} {volume}%",
+        "format-muted": "󰝟 MUTE",
+        "format-icons": { "default": ["󰕿", "󰖀", "󰕾"] },
+        "on-click": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
+        "on-click-right": "ghostty -e pulsemixer"
+    },
+
+    "custom/radio": {
+        "format": "{}",
+        "return-type": "json",
+        "interval": 2,
+        "exec": "~/.config/my_scripts/radio.sh",
+        "on-click": "~/.config/my_scripts/radio.sh --toggle",
+        "on-click-right": "~/.config/my_scripts/radio.sh --menu",
+        "signal": 1,
+        "tooltip": true
+    },
+
+
+    "tray":{
+      "icon-size": 13,
+      "spacing": 10
+    },
+
+    "battery": {
+            "states": {
+                "good": 80,
+                "warning": 30,
+                "critical": 15
+            },
+            "format": "{icon} {capacity}%",
+            "format-charging": "󱐋 {capacity}%",
+            "format-plugged": "󱈑 {capacity}%",
+            "format-alt": "{icon} {time}",
+            "format-icons": ["󰂎", "󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"]
+        },
+
+    "network": {
+        // Priority: If wired is plugged in, it shows that. Otherwise, it shows wifi.
+        "format-ethernet": "󰈀 ",
+        "format-wifi": "󰖩 ",
+        "format-linked": "󰈀  (No IP)",
+        "format-disconnected": "󰅛 Disconnected",
+        "tooltip-format": "{ifname} via {gwaddr} 󰊄",
+        "tooltip-format-wifi": "{essid} ({signalStrength}%) ",
+        "tooltip-format-ethernet": "{ifname} ",
+        "tooltip-format-disconnected": "Disconnected",
+        "max-length": 50,
+        "on-click": "ghostty -e impala"
+    }
+
+}
