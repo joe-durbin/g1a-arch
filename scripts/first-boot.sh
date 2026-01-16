@@ -166,7 +166,8 @@ install_disk_tools() {
     ntfs-3g \
     gvfs-smb \
     gvfs-nfs \
-    dosfstools
+    dosfstools \
+    exfat-utils
 }
 
 install_terminal_tools() {
@@ -184,9 +185,11 @@ install_terminal_tools() {
     ncdu \
     ripgrep \
     socat \
+    tealdeer \
     wget \
     yazi \
     zip
+  tldr --update
 }
 
 install_flatpak() {
