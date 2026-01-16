@@ -8,12 +8,18 @@ input {
     keyboard {
         xkb {
             layout "gb"
+            variant "mac"
         }
         numlock
     }
     touchpad {
         tap
         natural-scroll
+    }
+    mouse {
+        // Lowering this value will slow down the scroll.
+        // Try 0.5 or even 0.2 if 1.0 is too fast.
+        // scroll-factor 0.0125
     }
 }
 
@@ -47,9 +53,10 @@ layout {
     }
     default-column-width { proportion 0.5; }
     focus-ring {
-        width 2
+        width 1 
         //active-color "#7fc8ff"
-        active-color "#a6adc8"
+        //active-color "#a6adc8"
+        active-color "#ffa564"
         inactive-color "#505050"
     }
     border {
@@ -67,6 +74,7 @@ layout {
     }
 }
 
+spawn-at-startup "dbus-update-activation-environment" "--systemd" "WAYLAND_DISPLAY" "XDG_CURRENT_DESKTOP" "NIRI_SOCKET"
 spawn-at-startup "waybar"
 spawn-at-startup "mako"
 spawn-at-startup "swaybg" "-i" "/home/joe/.current_wallpaper" "-m" "fill"
@@ -91,6 +99,11 @@ window-rule {
 window-rule {
     match app-id=r#"firefox$"# title="^Picture-in-Picture$"
     open-floating true
+}
+
+window-rule {
+    match app-id="com.hypixel.HytaleLauncher"
+    open-floating false
 }
 
 window-rule {
@@ -135,6 +148,7 @@ binds {
     Mod+Shift+Slash { show-hotkey-overlay; }
     Mod+B hotkey-overlay-title="Run a Browser: firefox" { spawn "firefox"; }
     Mod+Space hotkey-overlay-title="Run an Application: fuzzel" { spawn "fuzzel"; }
+    Mod+ALT+W { spawn-sh "pkill -USR1 waybar"; }
     //Mod+Shift+P { power-off-monitors; }
 
     // Defaults

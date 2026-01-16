@@ -35,7 +35,16 @@ update_system() {
 install_base_reqs() {
   sudo pacman -S --noconfirm --needed \
     base-devel \
+    rust \
     git
+}
+
+install_yay() {
+  rm -rf ~/yay
+  git clone https://aur.archlinux.org/yay.git ~/yay
+  (cd ~/yay && makepkg -si --noconfirm)
+  rm -rf ~/yay
+  yay --version
 }
 
 install_niri_defaults() {
@@ -46,7 +55,6 @@ install_niri_defaults() {
     niri \
     swaybg \
     swayidle \
-    swaylock \
     waybar \
     xdg-desktop-portal-gnome \
     xorg-xwayland \
@@ -81,29 +89,35 @@ install_gui_extensions() {
     kvantum \
     kvantum-qt5 \
     hyprlock \
-    hypridle \
-    hyprpolkitagent
+    hypridle
+  yay -S --noconfirm --needed \
+    soteria-git
 }
 
 configure_niri_polkit_and_lock_services() {
+  sudo chmod 4755 /usr/lib/polkit-1/polkit-agent-helper-1
   mkdir -p ~/.config/systemd/user
-  cat >~/.config/systemd/user/polkit-agent.service <<'EOF'
+  cat >~/.config/systemd/user/soteria.service <<'EOF'
 [Unit]
-Description=Polkit authentication agent (hyprpolkitagent)
+Description=Polkit authentication agent (soteria)
+Requisite=graphical-session.target
 After=graphical-session.target
 PartOf=graphical-session.target
 
 [Service]
-ExecStart=/usr/lib/hyprpolkitagent/hyprpolkitagent
+Type=simple
+ExecStart=/usr/lib/soteria-polkit/soteria
 Restart=on-failure
-RestartSec=1
+RestartSec=2
+ImportCredential=yes
 
 [Install]
 WantedBy=graphical-session.target
 EOF
   cat >~/.config/systemd/user/hypridle.service <<'EOF'
 [Unit]
-Description=Hypridle
+Description=Idle Manager for Wayland
+Requisite=graphical-session.target
 After=graphical-session.target
 PartOf=graphical-session.target
 
@@ -111,12 +125,13 @@ PartOf=graphical-session.target
 ExecStart=/usr/bin/hypridle
 Restart=on-failure
 RestartSec=1
+TimeoutStopSec=5
 
 [Install]
 WantedBy=graphical-session.target
 EOF
   systemctl --user daemon-reload
-  systemctl --user enable polkit-agent.service
+  systemctl --user enable soteria.service
   systemctl --user enable hypridle.service
 }
 
@@ -130,14 +145,6 @@ install_fonts() {
 
 set_wallpaper() {
   ln -s ~/Wallpaper/wallhaven-dp19wl.jpg ~/.current_wallpaper
-}
-
-install_yay() {
-  rm -rf ~/yay
-  git clone https://aur.archlinux.org/yay.git ~/yay
-  (cd ~/yay && makepkg -si --noconfirm)
-  rm -rf ~/yay
-  yay --version
 }
 
 install_connectivity_tools() {
@@ -219,7 +226,8 @@ install_network_tools() {
     nmap \
     qt6-multimedia-ffmpeg \
     wireshark-qt \
-    wireshark-cli
+    wireshark-cli \
+    rustnet
 }
 
 install_social() {
@@ -251,6 +259,7 @@ configure_firewall() {
   sudo ufw --force reset
   sudo ufw default deny incoming
   sudo ufw default allow outgoing
+  sudo ufw allow ssh
   sudo ufw --force enable
   sudo systemctl enable --now ufw
   sudo ufw status
@@ -299,63 +308,36 @@ pause() {
 
 main() {
   mkdir -p ~/.config
-  configure_wifi
-  pause
-  enable_systemd_dns
-  pause
+  configure_wifi; pause
+  enable_systemd_dns; pause
   #enable_ssh; pause
-  update_system
-  pause
-  install_base_reqs
-  pause
-  install_yay
-  pause
-  set_wallpaper
-  pause
-  install_niri_defaults
-  pause
-  install_gui_extensions
-  pause
-  configure_niri_polkit_and_lock_services
-  pause
-  install_fonts
-  pause
-  install_connectivity_tools
-  pause
-  install_sound_tools
-  pause
-  install_disk_tools
-  pause
-  install_terminal_tools
-  pause
-  install_editors
-  pause
-  install_flatpak
-  pause
-  configure_lazyvim
-  pause
-  install_browsers
-  pause
-  install_cloud_tools
-  pause
-  install_network_tools
-  pause
-  install_social
-  pause
-  install_games
-  pause
-  configure_shells
-  pause
-  configure_dotfiles
-  pause
-  configure_firewall
-  pause
-  set_darkmode
-  pause
-  fix_mouse
-  pause
-  configure_snapshots
-  pause
+  update_system; pause
+  install_base_reqs; pause
+  install_yay; pause
+  set_wallpaper; pause
+  install_niri_defaults; pause
+  install_gui_extensions; pause
+  configure_niri_polkit_and_lock_services; pause
+  install_fonts; pause
+  install_connectivity_tools; pause
+  install_sound_tools; pause
+  install_disk_tools; pause
+  install_terminal_tools; pause
+  install_editors; pause
+  install_flatpak; pause
+  configure_lazyvim; pause
+  install_browsers; pause
+  install_cloud_tools; pause
+  install_network_tools; pause
+  install_social; pause
+  install_games; pause
+  configure_shells; pause
+  configure_dotfiles; pause
+  configure_firewall; pause
+  set_darkmode; pause
+  fix_mouse; pause
+  configure_snapshots; pause
+
   echo "Completed. Please reboot"
 }
 

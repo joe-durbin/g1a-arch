@@ -2,13 +2,13 @@
 set -euo pipefail
 set -x
 
-export LUKS_PASSPHRASE="strixhalo.boot"
-export ROOT_PASS="archroot.btw"
-export USER_NAME="joe"
-export USER_PASS="arch.btw"
-export WIFI_SSID="EE-X7F2N3"
-export WIFI_PASS="MkNvLpfKb4hrpa"
-export RAM_GB=32
+LUKS_PASSPHRASE="strixhalo.boot"
+ROOT_PASS="archroot.btw"
+USER_NAME="joe"
+USER_PASS="arch.btw"
+WIFI_SSID="EE-X7F2N3"
+WIFI_PASS="MkNvLpfKb4hrpa"
+RAM_GB=32
 
 configure_live_environment() {
   loadkeys uk
@@ -241,33 +241,21 @@ pause() {
 }
 
 main() {
-  configure_live_environment
-  pause
+  configure_live_environment; pause
   #enable_ssh; pause
-  clear_and_partition_drive
-  pause
-  create_and_open_LUKS
-  pause
-  format_partitions
-  pause
-  mount_partitions
-  pause
-  configure_swap
-  pause
-  pacstrap_base
-  pause
-  configure_fstab
-  pause
-  chroot_config
-  pause
-  copy_firstboot_script
-  pause
-  copy_wallpaper
-  pause
-  copy_firefox_config
-  pause
+  clear_and_partition_drive; pause
+  create_and_open_LUKS; pause
+  format_partitions; pause
+  mount_partitions; pause
+  configure_swap; pause
+  pacstrap_base; pause
+  configure_fstab; pause
+  chroot_config; pause
+  copy_firstboot_script; pause
+  copy_wallpaper; pause
+  copy_firefox_config; pause
   unmount_and_close_LUKS
-  read -rp $'Press Enter to reboot…'
+  read -rp $'Setup complete. Press Enter to reboot…'
   reboot
 }
 
