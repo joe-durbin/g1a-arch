@@ -188,6 +188,7 @@ install_terminal_tools() {
     tealdeer \
     wget \
     yazi \
+    unzip \
     zip
   tldr --update
 }
@@ -247,13 +248,13 @@ install_games() {
 configure_shells() {
   sudo pacman -S --noconfirm --needed \
     starship
-  cp -f shell_rc/.bashrc ~/.bashrc
+  cp -f ~/first-boot/shell_rc/.bashrc ~/.bashrc
 }
 
 configure_dotfiles() {
   sudo pacman -S --noconfirm --needed \
     rsync
-  rsync -av config_files/ ~/.config/
+  rsync -av ~/first-boot/config_files/ ~/.config/
 }
 
 configure_firewall() {
@@ -279,7 +280,21 @@ set_darkmode() {
 fix_mouse() {
   sudo pacman -S --noconfirm --needed \
     solaar
-  solaar config "MX Master 3S" hires-smooth-resolution False
+  # solaar config "MX Master 3S" hires-smooth-resolution False
+}
+
+enable_secureboot(){
+  sbctl status
+  sudo sbctl create-keys
+  sudo sbctl enroll-keys -m
+  sudo sbctl verify
+  sudo sbctl sign -s /boot/EFI/BOOT/BOOTX64.EFI
+  sudo sbctl sign -s /boot/EFI/Linux/arch-linux-zen.efi
+  sudo sbctl sign -s /boot/EFI/Linux/arch-linux-zen-fallback.efi
+  sudo sbctl sign -s /boot/EFI/systemd/systemd-bootx64.efi
+  sudo sbctl sign -s /boot/vmlinuz-linux-zen
+  sudo sbctl verify
+  sudo sbctl sign -s -o /usr/lib/systemd/boot/efi/systemd-bootx64.efi.signed /usr/lib/systemd/boot/efi/systemd-bootx64.efi
 }
 
 configure_snapshots() {
@@ -305,7 +320,7 @@ configure_snapshots() {
 }
 
 pause() {
-  #read -p $'\nPress [Enter] to continue to the next step...\ni'
+  #read -p $'\nPress [Enter] to continue to the next step...\n'
   echo done
 }
 
@@ -339,9 +354,13 @@ main() {
   configure_firewall; pause
   set_darkmode; pause
   fix_mouse; pause
+  enable_secureboot; pause
   configure_snapshots; pause
 
-  echo "Completed. Please reboot"
+  echo "Completed. Shutting down..."
+  echo "You can now enable secureboot in the BIOS"
+  sleep 10
+  poweroff
 }
 
 main "$@"

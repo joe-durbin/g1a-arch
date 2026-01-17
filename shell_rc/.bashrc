@@ -19,7 +19,7 @@ alias pkg-sync='~/.config/my_scripts/pkg-manager.sh sync'
 alias wp-pick='~/.config/my_scripts/wallpaper-pick.sh'
 alias wp-set='~/.config/my_scripts/wallpaper-set.sh'
 alias nf='~/.config/my_scripts/nerdpick.sh'
-
+alias conf='zeditor ~/.config/'
 alias clip='wl-copy'
 
 # Flatpak stuff

@@ -96,14 +96,23 @@ configure_swap() {
 pacstrap_base() {
   mkdir -p /mnt/etc
   echo "KEYMAP=uk" >/mnt/etc/vconsole.conf
-  pacstrap -K /mnt \
+  pacman-key --init
+  pacman-key --populate
+  pacstrap /mnt \
     base \
     linux-zen \
-    linux-firmware \
+    linux-firmware-amdgpu \
+    linux-firmware-mediatek \
+    linux-firmware-other \
     amd-ucode \
+    alsa-topology-conf \
+    alsa-ucm-conf \
+    wireless-regdb \
     efibootmgr \
     btrfs-progs \
     cryptsetup \
+    sbsigntools \
+    sbctl \
     plymouth \
     iwd \
     openssh \
@@ -116,16 +125,19 @@ configure_fstab() {
   sed -i 's/fmask=0022,dmask=0022/fmask=0077,dmask=0077/g' /mnt/etc/fstab
 }
 
-chroot_config() {
-  mkdir -p /mnt/tmp
-  cat >/mnt/tmp/pw <<EOF
+setup_chroot_vars() {
+  cat >/mnt/etc/install_vars <<EOF
 ROOT_PASS="$ROOT_PASS"
 USER_NAME="$USER_NAME"
 USER_PASS="$USER_PASS"
 RAM_GB="$RAM_GB"
 EOF
+}
+
+chroot_config() {
   arch-chroot /mnt /bin/bash <<'CHROOT'
-source /tmp/pw
+set -euo pipefail
+source /etc/install_vars
 ln -sf /usr/share/zoneinfo/Europe/London /etc/localtime
 hwclock --systohc
 sed -i 's/^#\s*\(en_GB.UTF-8 UTF-8\)/\1/' /etc/locale.gen
@@ -140,6 +152,7 @@ cat > /etc/hosts <<'EOF'
 EOF
 sed -i 's/^#\s*\(MulticastDNS=yes\)/\1/' /etc/systemd/resolved.conf
 mkdir -p /etc/iwd
+mkdir -p /etc/systemd/network
 cat > /etc/iwd/main.conf <<'EOF'
 [General]
 EnableNetworkConfiguration=false
@@ -170,30 +183,34 @@ MulticastDNS=yes
 [DHCPv4]
 UseHostname=true
 EOF
-ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
+ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf || true
 systemctl enable systemd-networkd
 systemctl enable systemd-resolved
 systemctl enable iwd
 systemctl enable fstrim.timer
 sed -i 's/^MODULES=().*/MODULES=(amdgpu)/' /etc/mkinitcpio.conf
-sed -i 's|^HOOKS=(.*)|HOOKS=(base systemd autodetect modconf kms keyboard sd-vconsole plymouth block sd-encrypt filesystems resume)|' /etc/mkinitcpio.conf
+sed -i 's|^HOOKS=(.*)|HOOKS=(base systemd autodetect microcode modconf kms keyboard sd-vconsole plymouth block sd-encrypt filesystems resume)|' /etc/mkinitcpio.conf
 bootctl install
 cat > /boot/loader/loader.conf <<'EOF'
-default arch
 timeout 0
 editor no
 EOF
-LUKS_UUID=$(blkid -s UUID -o value /dev/nvme0n1p2) && \
-ROOT_UUID=$(blkid -s UUID -o value /dev/mapper/cryptroot) && \
-RESUME_OFFSET=$(btrfs inspect-internal map-swapfile -r /.swap/swapfile) && \
-mkdir -p /boot/loader/entries && \
-cat > /boot/loader/entries/arch.conf <<EOF
-title   Arch Linux (zen)
-linux   /vmlinuz-linux-zen
-initrd  /amd-ucode.img
-initrd  /initramfs-linux-zen.img
-options rd.luks.name=${LUKS_UUID}=cryptroot rd.luks.options=discard root=/dev/mapper/cryptroot rootfstype=btrfs rootflags=subvol=@ rw quiet splash resume=UUID=${ROOT_UUID} resume_offset=${RESUME_OFFSET} vt.global_cursor_default=0
+LUKS_UUID=$(blkid -s UUID -o value /dev/nvme0n1p2)
+ROOT_UUID=$(blkid -s UUID -o value /dev/mapper/cryptroot)
+RESUME_OFFSET=$(btrfs inspect-internal map-swapfile -r /.swap/swapfile)
+mkdir -p /etc/kernel
+echo "rd.luks.name=${LUKS_UUID}=cryptroot rd.luks.options=discard root=/dev/mapper/cryptroot rootfstype=btrfs rootflags=subvol=@ rw quiet splash resume=UUID=${ROOT_UUID} resume_offset=${RESUME_OFFSET} vt.global_cursor_default=0" > /etc/kernel/cmdline
+mkdir -p /boot/EFI/Linux
+cat > /etc/mkinitcpio.d/linux-zen.preset <<'EOF'
+ALL_kver="/boot/vmlinuz-linux-zen"
+ALL_config="/etc/mkinitcpio.conf"
+ALL_cmdline="/etc/kernel/cmdline"
+PRESETS=('default' 'fallback')
+default_uki="/boot/EFI/Linux/arch-linux-zen.efi"
+fallback_uki="/boot/EFI/Linux/arch-linux-zen-fallback.efi"
+fallback_options="-S autodetect"
 EOF
+#mkinitcpio -P
 echo "options amdgpu runpm=0" > /etc/modprobe.d/amdgpu.conf
 sed -i 's/^#\s*\(%wheel ALL=(ALL:ALL) ALL\)/\1/' /etc/sudoers
 IMAGE_SIZE_BYTES=$(( (RAM_GB - 1) * 1024 * 1024 * 1024 ))
@@ -202,9 +219,12 @@ cat > /etc/tmpfiles.d/hibernation-image-size.conf <<EOF
 w /sys/power/image_size - - - - ${IMAGE_SIZE_BYTES}
 EOF
 plymouth-set-default-theme -R bgrt
+rm -f /boot/initramfs-linux-zen.img
+rm -f /boot/initramfs-linux-zen-fallback.img
 echo "root:$ROOT_PASS" | chpasswd
 useradd -m -G wheel "$USER_NAME"
 echo "$USER_NAME:$USER_PASS" | chpasswd
+rm -f /etc/install_vars
 exit
 CHROOT
 }
@@ -214,6 +234,7 @@ copy_firstboot_script() {
   cp scripts/first-boot.sh /mnt/home/$USER_NAME/first-boot/first-boot.sh
   cp -r config_files /mnt/home/$USER_NAME/first-boot/
   cp -r shell_rc /mnt/home/$USER_NAME/first-boot/
+  cp -r scripts /mnt/home/$USER_NAME/
   chown -R 1000:1000 /mnt/home/$USER_NAME/first-boot
   chmod +x /mnt/home/$USER_NAME/first-boot/first-boot.sh
 }
@@ -221,12 +242,6 @@ copy_firstboot_script() {
 copy_wallpaper() {
   cp -r Wallpaper /mnt/home/$USER_NAME/
   chown -R 1000:1000 /mnt/home/$USER_NAME/Wallpaper
-}
-
-copy_firefox_config() {
-  cp scripts/unfuck-firefox.sh /mnt/home/$USER_NAME/unfuck-firefox.sh
-  chown 1000:1000 /mnt/home/$USER_NAME/unfuck-firefox.sh
-  chmod +x /mnt/home/$USER_NAME/unfuck-firefox.sh
 }
 
 unmount_and_close_LUKS() {
@@ -241,21 +256,33 @@ pause() {
 }
 
 main() {
-  configure_live_environment; pause
+  configure_live_environment
+  pause
   #enable_ssh; pause
-  clear_and_partition_drive; pause
-  create_and_open_LUKS; pause
-  format_partitions; pause
-  mount_partitions; pause
-  configure_swap; pause
-  pacstrap_base; pause
-  configure_fstab; pause
-  chroot_config; pause
-  copy_firstboot_script; pause
-  copy_wallpaper; pause
-  copy_firefox_config; pause
+  clear_and_partition_drive
+  pause
+  create_and_open_LUKS
+  pause
+  format_partitions
+  pause
+  mount_partitions
+  pause
+  configure_swap
+  pause
+  pacstrap_base
+  pause
+  configure_fstab
+  pause
+  setup_chroot_vars
+  pause
+  chroot_config
+  pause
+  copy_firstboot_script
+  pause
+  copy_wallpaper
+  pause
   unmount_and_close_LUKS
-  read -rp $'Setup complete. Press Enter to reboot…'
+  #read -rp $'Setup complete. Press Enter to reboot…'
   reboot
 }
 
