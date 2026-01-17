@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 WIFI_SSID="EE-X7F2N3"
 WIFI_PASSWORD="MkNvLpfKb4hrpa"
+GIT_EMAIL="joe.durbin@gmail.com"
+GIT_USER="Joe Durbin"
 
 set -euo pipefail
 
@@ -277,6 +279,12 @@ set_darkmode() {
   echo -e "[Settings]\ngtk-application-prefer-dark-theme=1" >~/.config/gtk-4.0/settings.ini
 }
 
+configure_git(){
+  git config --global user.email "$GIT_EMAIL"
+  git config --global user.name "$GIT_USER"
+  git config --global init.defaultBranch main
+}
+
 fix_mouse() {
   sudo pacman -S --noconfirm --needed \
     solaar
@@ -353,6 +361,7 @@ main() {
   configure_dotfiles; pause
   configure_firewall; pause
   set_darkmode; pause
+  configure_git; pause
   fix_mouse; pause
   enable_secureboot; pause
   configure_snapshots; pause
