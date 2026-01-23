@@ -83,9 +83,8 @@ spawn-at-startup "dbus-update-activation-environment" "--systemd" "WAYLAND_DISPL
 spawn-at-startup "waybar"
 spawn-at-startup "mako"
 spawn-at-startup "swaybg" "-i" "/home/joe/.current_wallpaper" "-m" "fill"
+spawn-at-startup "udiskie" "--smart-tray" "--notify"
 
-
-//spawn-at-startup "udiskie" "--smart-tray" "--notify"
 //spawn-sh-at-startup "mpv --no-video --audio-device='pipewire/alsa_output.pci-0000_c3_00.6.HiFi__Speaker__sink' .config/niri/startup.mp3"
 
 hotkey-overlay {

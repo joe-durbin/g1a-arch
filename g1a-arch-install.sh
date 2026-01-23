@@ -1,14 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
-set -x
 
-LUKS_PASSPHRASE="strixhalo.boot"
-ROOT_PASS="archroot.btw"
-USER_NAME="joe"
-USER_PASS="arch.btw"
-WIFI_SSID="EE-X7F2N3"
-WIFI_PASS="MkNvLpfKb4hrpa"
-RAM_GB=32
+source ./.env
 
 configure_live_environment() {
   loadkeys uk
@@ -105,6 +98,7 @@ pacstrap_base() {
     linux-firmware-mediatek \
     linux-firmware-other \
     amd-ucode \
+    linux-firmware-cirrus \
     alsa-topology-conf \
     alsa-ucm-conf \
     wireless-regdb \
@@ -114,6 +108,7 @@ pacstrap_base() {
     sbsigntools \
     sbctl \
     plymouth \
+    iptables-nft \
     iwd \
     openssh \
     sudo \
@@ -229,19 +224,23 @@ exit
 CHROOT
 }
 
-copy_firstboot_script() {
+copy_wallpaper() {
+  cp -r Wallpaper /mnt/home/$USER_NAME/
+  chown -R 1000:1000 /mnt/home/$USER_NAME/Wallpaper
+}
+
+copy_firstboot() {
+  cp first-boot.sh /mnt/home/$USER_NAME/first-boot.sh
+  chmod +x /mnt/home/$USER_NAME/first-boot.sh
+  cp user-land.sh /mnt/home/$USER_NAME/user-land.sh
+  chmod +x /mnt/home/$USER_NAME/first-boot.sh
   mkdir -p /mnt/home/$USER_NAME/first-boot/
-  cp scripts/first-boot.sh /mnt/home/$USER_NAME/first-boot/first-boot.sh
+  cp ./.env /mnt/home/$USER_NAME/first-boot/.env
   cp -r config_files /mnt/home/$USER_NAME/first-boot/
   cp -r shell_rc /mnt/home/$USER_NAME/first-boot/
   cp -r scripts /mnt/home/$USER_NAME/
   chown -R 1000:1000 /mnt/home/$USER_NAME/first-boot
-  chmod +x /mnt/home/$USER_NAME/first-boot/first-boot.sh
-}
-
-copy_wallpaper() {
-  cp -r Wallpaper /mnt/home/$USER_NAME/
-  chown -R 1000:1000 /mnt/home/$USER_NAME/Wallpaper
+  chown -R 1000:1000 /mnt/home/$USER_NAME/scripts
 }
 
 unmount_and_close_LUKS() {
@@ -250,40 +249,22 @@ unmount_and_close_LUKS() {
   cryptsetup close cryptroot
 }
 
-pause() {
-  #read -p $'\nPress [Enter] to continue to the next step...\n'
-  echo "Done"
-}
-
 main() {
   configure_live_environment
-  pause
-  #enable_ssh; pause
+  enable_ssh
   clear_and_partition_drive
-  pause
   create_and_open_LUKS
-  pause
   format_partitions
-  pause
   mount_partitions
-  pause
   configure_swap
-  pause
   pacstrap_base
-  pause
   configure_fstab
-  pause
   setup_chroot_vars
-  pause
   chroot_config
-  pause
-  copy_firstboot_script
-  pause
   copy_wallpaper
-  pause
+  copy_firstboot
   unmount_and_close_LUKS
-  #read -rp $'Setup complete. Press Enter to reboot…'
-  reboot
+  poweroff
 }
 
 main "$@"
