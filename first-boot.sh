@@ -3,6 +3,11 @@ set -euo pipefail
 
 source ~/first-boot/.env
 
+configure_pacman() {
+  sudo sed -i 's/^#Color/Color/' /etc/pacman.conf
+  sudo sed -i '/^#\[multilib\]/,/^#Include/ s/^#//' /etc/pacman.conf
+}
+
 configure_wifi() {
   local scan_timeout=30
   local scan_interval=3
@@ -47,7 +52,8 @@ install_base_reqs() {
   sudo pacman -S --noconfirm --needed \
     base-devel \
     rust \
-    git
+    git \
+    github-cli
 }
 
 configure_firewall() {
@@ -62,12 +68,16 @@ table inet filter {
         iifname "docker*" accept comment "Trust Docker default bridge"
         iifname "br-*" accept comment "Trust Docker custom bridges"
         tcp dport 22 accept comment "Allow SSH"
+        tcp dport 9090 accept comment "Allow Cockpit Web Interface"
+        tcp dport 53317 accept comment "Allow LocalSend (TCP)"
+        udp dport 53317 accept comment "Allow LocalSend (UDP)"
+        udp dport 53317 ip daddr 224.0.0.167 accept comment "Allow LocalSend Discovery"
         icmp type echo-request accept comment "Allow Ping"
     }
     chain forward {
         type filter hook forward priority filter - 10; policy drop;
         ct state established,related accept
-        iifname {"wlan*", "en*" } oifname { "docker*", "br-*" } ct state new ct status dnat accept
+        iifname { "wlan*", "en*" } oifname { "docker*", "br-*" } ct state new ct status dnat accept
         iifname "virbr*" accept
         iifname "docker*" accept
         iifname "br-*" accept
@@ -76,7 +86,7 @@ table inet filter {
 }
 table ip nat {
     chain postrouting {
-        type nat hook postrouting priority 100;
+        type nat hook postrouting priority srcnat;
         oifname "wlan*" masquerade
         oifname "en*" masquerade
     }
@@ -114,9 +124,13 @@ install_niri_defaults() {
 [terminal]
 vt = 1
 
-[default_session]
+[initial_session]
 command = "sh -c 'niri-session > /dev/null 2>&1'"
 user = "$USER"
+
+[default_session]
+command = "agreety --cmd niri-session"
+user = "greeter"
 EOF
   sudo systemctl enable seatd.service
   sudo systemctl enable greetd.service
@@ -388,6 +402,7 @@ main() {
   echo "$USER ALL=(ALL:ALL) NOPASSWD: ALL" | sudo tee /etc/sudoers.d/first-boot-privs >/dev/null
   mkdir -p ~/.config
 
+  configure_pacman
   configure_wifi
   enable_systemd_dns
   enable_ssh
@@ -395,33 +410,23 @@ main() {
   install_base_reqs
   configure_firewall
   install_yay
-  set_wallpaper
   install_niri_defaults
   install_gui_extensions
   configure_niri_polkit_and_lock_services
+  set_darkmode
   install_fonts
+  set_wallpaper
   install_connectivity_tools
   install_sound_tools
   install_disk_tools
   install_terminal_tools
-  install_editors
+  configure_shells
+  configure_dotfiles
+  configure_git
   install_flatpak
   configure_lazyvim
   install_browsers
-  install_office
-  install_cloud_tools
-  install_network_tools
-  install_social
-  install_videoedit
-  install_virtualisation
-  install_docker
-  install_games
   configure_tts
-  configure_shells
-  configure_dotfiles
-  set_darkmode
-  configure_git
-  fix_mouse
   enable_secureboot
   configure_snapshots
 

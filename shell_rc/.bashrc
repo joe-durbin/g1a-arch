@@ -11,7 +11,7 @@ PS1='[\u@\h \W]\$ '
 export VISUAL="nvim"
 export EDITOR="nvim"
 
-alias ff='fastfetch'
+alias ff='fastfetch; echo; duf --only local,fuse'
 alias p='~/.config/my_scripts/pkg-manager.sh p'
 alias y='~/.config/my_scripts/pkg-manager.sh y'
 alias r='~/.config/my_scripts/pkg-manager.sh r'
@@ -21,7 +21,7 @@ alias wp-set='~/.config/my_scripts/wallpaper-set.sh'
 alias nf='~/.config/my_scripts/nerdpick.sh'
 alias conf='zeditor ~/.config/'
 alias clip='wl-copy'
-
+alias say='spd-say'
 # Flatpak stuff
 # alias discord='flatpak run com.discordapp.Discord --no-sandbox --enable-features=UseOzonePlatform --ozone-platform=wayland'
 
@@ -34,12 +34,12 @@ alias ls='eza -l --icons --group-directories-first'
 alias cat='bat -p'
 
 alias k='kubectl'
-
+alias ubuntu='distrobox enter Ubuntu2404 --no-workdir'
 #eval "$(navi widget bash)"
 #eval "$(atuin init bash)"
 
-export CARAPACE_LENIENT=1
-export CARAPACE_MATCH=1
+#export CARAPACE_LENIENT=1
+#export CARAPACE_MATCH=1
 #source <(carapace _carapace bash)
 
 eval "$(starship init bash)"

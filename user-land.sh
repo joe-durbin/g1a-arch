@@ -7,6 +7,10 @@ install_editors() {
     zed
 }
 
+install_security() {
+  sudo pacman -S --noconfirm --needed \
+    keepassxc
+}
 install_office() {
   sudo pacman -S --noconfirm --needed \
     libreoffice-fresh \
@@ -65,17 +69,30 @@ install_docker() {
   "firewall-backend": "nftables"
 }
 EOF
+  sudo mkdir -p /etc/systemd/system/docker.service.d
+  sudo tee /etc/systemd/system/docker.service.d/override.conf >/dev/null <<EOF
+[Unit]
+After=nftables.service
+Wants=nftables.service
+EOF
   sudo usermod -aG docker $USER
+  sudo systemctl enable docker.socket
   sudo systemctl enable docker.service
 }
 
 install_games() {
   sudo pacman -S --noconfirm --needed \
+    lib32-vulkan-radeon \
+    steam \
     jre-openjdk \
     prismlauncher
-  mkdir -p ~/Downloads
-  wget https://launcher.hytale.com/builds/release/linux/amd64/hytale-launcher-latest.flatpak -O ~/Downloads/hytale-launcher-latest.flatpak
-  sudo flatpak install -y ~/Downloads/hytale-launcher-latest.flatpak
+  yay -S --noconfirm --needed \
+    heroic-games-launcher-bin
+  if ! flatpak list | grep -q "com.hypixel.HytaleLauncher"; then
+    mkdir -p ~/Downloads
+    wget https://launcher.hytale.com/builds/release/linux/amd64/hytale-launcher-latest.flatpak -O ~/Downloads/hytale-launcher-latest.flatpak
+    sudo flatpak install -y ~/Downloads/hytale-launcher-latest.flatpak
+  fi
 }
 
 main() {

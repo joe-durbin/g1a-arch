@@ -2,6 +2,7 @@ environment {
     ELECTRON_OZONE_PLATFORM_HINT "wayland"
     QT_QPA_PLATFORMTHEME "qt5ct"
     QT_AUTO_SCREEN_SCALE_FACTOR "1"
+    GDK_SCALE "2"
 }
 
 input {
@@ -103,11 +104,6 @@ window-rule {
 window-rule {
     match app-id=r#"firefox$"# title="^Picture-in-Picture$"
     open-floating true
-}
-
-window-rule {
-    match app-id="com.hypixel.HytaleLauncher"
-    open-floating false
 }
 
 window-rule {

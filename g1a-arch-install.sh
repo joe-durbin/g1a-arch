@@ -183,6 +183,7 @@ systemctl enable systemd-networkd
 systemctl enable systemd-resolved
 systemctl enable iwd
 systemctl enable fstrim.timer
+systemctl enable systemd-timesyncd
 sed -i 's/^MODULES=().*/MODULES=(amdgpu)/' /etc/mkinitcpio.conf
 sed -i 's|^HOOKS=(.*)|HOOKS=(base systemd autodetect microcode modconf kms keyboard sd-vconsole plymouth block sd-encrypt filesystems resume)|' /etc/mkinitcpio.conf
 bootctl install
@@ -233,7 +234,7 @@ copy_firstboot() {
   cp first-boot.sh /mnt/home/$USER_NAME/first-boot.sh
   chmod +x /mnt/home/$USER_NAME/first-boot.sh
   cp user-land.sh /mnt/home/$USER_NAME/user-land.sh
-  chmod +x /mnt/home/$USER_NAME/first-boot.sh
+  chmod +x /mnt/home/$USER_NAME/user-land.sh
   mkdir -p /mnt/home/$USER_NAME/first-boot/
   cp ./.env /mnt/home/$USER_NAME/first-boot/.env
   cp -r config_files /mnt/home/$USER_NAME/first-boot/
