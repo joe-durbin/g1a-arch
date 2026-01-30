@@ -148,7 +148,7 @@ binds {
     Mod+Shift+Slash { show-hotkey-overlay; }
     Mod+B hotkey-overlay-title="Run a Browser: firefox" { spawn "firefox"; }
     Mod+Space hotkey-overlay-title="Run an Application: fuzzel" { spawn "fuzzel"; }
-    Mod+ALT+W hotkey-overlay-title="Show/Hide Waybar" { spawn-sh "pkill -USR1 waybar"; }
+    Mod+Alt+W hotkey-overlay-title="Show/Hide Waybar" { spawn-sh "pkill -USR1 waybar"; }
     Mod+Alt+D hotkey-overlay-title="Toggle scale 1 on focused output" { spawn "/home/joe/scripts/niri-scale-toggle.sh"; }
     //Mod+Shift+P { power-off-monitors; }
 

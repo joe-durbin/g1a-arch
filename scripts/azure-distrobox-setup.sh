@@ -230,13 +230,10 @@ install_pipx_tools() {
   pipx_install "scoutsuite"
 
   # Enable bash completion for az CLI (best-effort)
-  if command -v az >/dev/null 2>&1; then
-    log "Writing az bash completion to /etc/bash_completion.d/azure-cli (best-effort)..."
-    sudo mkdir -p /etc/bash_completion.d
-    az completion bash | sudo tee /etc/bash_completion.d/azure-cli >/dev/null || true
-  else
-    log "az not found on PATH; skipping az completion file."
-  fi
+  sudo curl -fsSL \
+    https://raw.githubusercontent.com/Azure/azure-cli/dev/az.completion \
+    -o /usr/share/bash-completion/completions/az
+  sudo chmod 0644 /usr/share/bash-completion/completions/az
 }
 
 clone_repos() {
@@ -291,7 +288,7 @@ download_exfil_script() {
   local d="${INSTALL_DIR}/exfil_exchange_mail"
   mkdir -p "$d"
   wget -O "${d}/exfil_exchange_mail.py" \
-    "https://raw.githubusercontent.com/rootsecdev/Azure-Red-Team/master/exfil_exchange_mail.py" || true
+    "https://raw.githubusercontent.com/rootsecdev/Azure-Red-Team/refs/heads/master/Tokens/exfil_exchange_mail.py" || true
 }
 
 install_evil_winrm() {
