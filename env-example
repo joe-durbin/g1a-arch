@@ -1,0 +1,10 @@
+# Copy to .env and fill in your values. Do not commit .env.
+WIFI_SSID="your_wifi_ssid"
+WIFI_PASS="your_wifi_password"
+RAM_GB=32
+LUKS_PASSPHRASE="your_luks_passphrase"
+ROOT_PASS="your_root_password"
+USER_NAME="your_username"
+USER_PASS="your_user_password"
+GIT_EMAIL="your_email@example.com"
+GIT_USER="Your Name"
