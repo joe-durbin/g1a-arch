@@ -28,7 +28,9 @@ install_network_tools() {
     nmap \
     wireshark-qt \
     wireshark-cli \
-    rustnet
+    rustnet \
+    cockpit \
+    tailscale
 }
 
 install_social() {
@@ -43,7 +45,7 @@ install_videoedit() {
   sudo usermod -aG render $USER
 }
 
-install_virtualisation() {
+install_qemu() {
   sudo pacman -S --noconfirm --needed \
     qemu-desktop \
     virt-manager \
@@ -57,6 +59,13 @@ install_virtualisation() {
   sudo systemctl enable libvirtd.service
 }
 
+install_podman() {
+  sudo pacman -S --noconfirm --needed \
+    podman \
+    podman-compose \
+    podman-docker
+  sudo systemctl enable podman
+}
 install_docker() {
   sudo pacman -S --noconfirm --needed \
     docker \
@@ -102,8 +111,9 @@ main() {
   install_network_tools
   install_social
   install_videoedit
-  install_virtualisation
-  install_docker
+  install_qemu
+  install_podman
+  #  install_docker
   install_games
 }
 

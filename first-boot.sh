@@ -58,18 +58,11 @@ install_base_reqs() {
 
 configure_firewall() {
   sudo tee /etc/nftables.conf >/dev/null <<EOF
-table inet filter {
-    chain prerouting {
-        type filter hook prerouting priority raw - 10; policy accept;
-        iifname { "br-*", "veth*" } accept comment "Container/bridge traffic before Docker raw"
-    }
     chain input {
         type filter hook input priority filter - 10; policy drop;
         iif "lo" accept
         ct state established,related accept
         iifname "virbr*" accept comment "Trust all VM bridges"
-        iifname "docker*" accept comment "Trust Docker default bridge"
-        iifname "br-*" accept comment "Trust Docker custom bridges"
         tcp dport 22 accept comment "Allow SSH"
         tcp dport 9090 accept comment "Allow Cockpit Web Interface"
         tcp dport 53317 accept comment "Allow LocalSend (TCP)"
@@ -80,11 +73,7 @@ table inet filter {
     chain forward {
         type filter hook forward priority filter - 10; policy drop;
         ct state established,related accept
-        iifname { "wlan*", "en*" } oifname { "docker*", "br-*" } ct state new ct status dnat accept
         iifname "virbr*" accept
-        iifname "docker*" accept
-        iifname "br-*" accept
-        iifname "veth*" accept
     }
 }
 table ip nat {

@@ -16,6 +16,9 @@ set -euo pipefail
 # - Adds bashrc block (idempotent) for bash-completion + starship + aliases.
 # -------------------------------------------------------------------
 
+sudo apt update
+sudo apt upgrade
+
 INSTALL_DIR="${INSTALL_DIR:-/opt/pentest-azure}"
 PIPX_HOME="${PIPX_HOME:-/opt/pipx}"
 PIPX_BIN_DIR="${PIPX_BIN_DIR:-/opt/pipx/bin}"
@@ -43,7 +46,10 @@ declare -a REPOS=(
 )
 
 log() { printf '[%s] %s\n' "$(date +'%Y-%m-%d %H:%M:%S')" "$*" >&2; }
-die() { log "ERROR: $*"; exit 1; }
+die() {
+  log "ERROR: $*"
+  exit 1
+}
 
 require_cmd() {
   command -v "$1" >/dev/null 2>&1 || die "Missing required command: $1"
@@ -401,4 +407,3 @@ main() {
 }
 
 main "$@"
-
