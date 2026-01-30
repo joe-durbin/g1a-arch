@@ -73,7 +73,7 @@ EOF
   sudo tee /etc/systemd/system/docker.service.d/override.conf >/dev/null <<EOF
 [Unit]
 After=nftables.service
-Wants=nftables.service
+Required=nftables.service
 EOF
   sudo usermod -aG docker $USER
   sudo systemctl enable docker.socket

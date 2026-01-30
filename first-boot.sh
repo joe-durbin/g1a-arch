@@ -58,8 +58,11 @@ install_base_reqs() {
 
 configure_firewall() {
   sudo tee /etc/nftables.conf >/dev/null <<EOF
-flush ruleset
 table inet filter {
+    chain prerouting {
+        type filter hook prerouting priority raw - 10; policy accept;
+        iifname { "br-*", "veth*" } accept comment "Container/bridge traffic before Docker raw"
+    }
     chain input {
         type filter hook input priority filter - 10; policy drop;
         iif "lo" accept
