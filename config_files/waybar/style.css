@@ -14,7 +14,7 @@ window#waybar {
 
 tooltip {
     background: rgba(10, 10, 15, 0.95);
-    border: 1px solid #a6adc8;
+    border: 1px solid #ffa564;
     border-radius: 8px;
 }
 tooltip label {
@@ -32,6 +32,7 @@ tooltip label {
 #pulseaudio,
 #network,
 #custom-radio,
+#custom-stay-awake,
 #battery,
 #tray {
     padding: 0 7px;
@@ -69,6 +70,17 @@ tooltip label {
     color: #ffa564;
 } /* Preserved Radio Accent */
 #custom-radio.stopped {
+    color: #a6adc8;
+}
+
+#custom-stay-awake {
+    color: #a6adc8;
+    font-size: 13px;
+}
+#custom-stay-awake.active {
+    color: #ffa564;
+}
+#custom-stay-awake.inactive {
     color: #a6adc8;
 }
 

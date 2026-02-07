@@ -2,7 +2,6 @@ environment {
     ELECTRON_OZONE_PLATFORM_HINT "wayland"
     QT_QPA_PLATFORMTHEME "qt5ct"
     QT_AUTO_SCREEN_SCALE_FACTOR "1"
-    GDK_SCALE "2"
 }
 
 input {

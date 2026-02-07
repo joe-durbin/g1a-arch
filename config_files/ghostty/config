@@ -1,2 +1,5 @@
 #theme = Dracula
 theme = "Catppuccin Mocha"
+background-opacity = 0.9
+background-blur-radius = 20
+custom-shader = shaders/cursor_tail.glsl

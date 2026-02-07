@@ -192,6 +192,27 @@ EOF
   systemctl --user enable hypridle.service
 }
 
+configure_lock_suspend_system() {
+  sudo mkdir -p /etc/systemd/logind.conf.d
+  sudo mkdir -p /etc/systemd/system/systemd-suspend.service.d
+  sudo mkdir -p /etc/systemd/system/systemd-hibernate.service.d
+  sudo tee /etc/systemd/logind.conf.d/lid-suspend.conf >/dev/null <<'EOF'
+[Login]
+HandleLidSwitch=hibernate
+HandleLidSwitchDocked=ignore
+EOF
+  sudo tee /etc/systemd/system/systemd-suspend.service.d/override.conf >/dev/null <<'EOF'
+[Service]
+ExecStartPre=/usr/bin/sleep 2
+EOF
+  sudo tee /etc/systemd/system/systemd-hibernate.service.d/override.conf >/dev/null <<'EOF'
+[Service]
+ExecStartPre=/usr/bin/sleep 2
+EOF
+  sudo systemctl daemon-reload
+  sudo systemctl restart systemd-logind
+}
+
 set_darkmode() {
   gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark' || true
   gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita' || true
@@ -256,7 +277,8 @@ install_terminal_tools() {
     yazi \
     zip \
     unzip \
-    7zip
+    7zip \
+    zellij
   tldr --update
 }
 
@@ -294,7 +316,8 @@ configure_lazyvim() {
 
 install_browsers() {
   sudo pacman -S --noconfirm --needed \
-    firefox
+    firefox \
+    qutebrowser
 }
 
 configure_tts() {
@@ -405,6 +428,7 @@ main() {
   install_niri_defaults
   install_gui_extensions
   configure_niri_polkit_and_lock_services
+  configure_lock_suspend_system
   set_darkmode
   install_fonts
   set_wallpaper

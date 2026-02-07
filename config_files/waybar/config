@@ -8,7 +8,7 @@
     "spacing": 0,
 
     "modules-left": ["niri/workspaces"],
-    "modules-center": ["custom/radio", "clock"],
+    "modules-center": ["custom/radio", "clock", "custom/stay-awake"],
     "modules-right": ["tray", "cpu", "memory", "custom/gpu", "battery", "pulseaudio", "network" ],
 
     "niri/workspaces": {
@@ -60,6 +60,16 @@
         "exec": "~/.config/my_scripts/radio.sh",
         "on-click": "~/.config/my_scripts/radio.sh --toggle",
         "on-click-right": "~/.config/my_scripts/radio.sh --menu",
+        "signal": 1,
+        "tooltip": true
+    },
+
+    "custom/stay-awake": {
+        "format": "{}",
+        "return-type": "json",
+        "interval": 5,
+        "exec": "~/.config/my_scripts/stay-awake.sh",
+        "on-click": "~/.config/my_scripts/stay-awake.sh --toggle",
         "signal": 1,
         "tooltip": true
     },
